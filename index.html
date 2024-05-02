@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agroconnect</title>
+    <style>
+        /* CSS styles from both pages */
+        body { font-family: Arial, sans-serif; text-align: center; margin: 0; padding: 0; }
+        #main { max-width: 600px; margin: 0 auto; padding: 20px; }
+        input { width: 100%; padding: 8px; margin: 5px 0; box-sizing: border-box; }
+        button { padding: 10px 20px; background-color: #4CAF50; color: white; border: none; cursor: pointer; }
+        button:hover { background-color: #45a049; }
+        .hidden { display: none; }
+        #space { margin: 10px; }
+        header { background-color: #f2f2f2; padding: 20px; text-align: center; }
+        .container { display: flex; justify-content: space-around; flex-wrap: wrap; }
+        .item { margin: 20px; text-align: center; }
+        img { width: 200px; height: 200px; object-fit: cover; margin-bottom: 10px; }
+        select { margin-bottom: 10px; }
+        #cart { background-color: #f9f9f9; padding: 20px; margin-top: 20px; }
+        #cartItems { list-style-type: none; padding: 0; }
+        li { margin-bottom: 10px; }
+    </style>
+</head>
+<body>
+    <div id="main">
+        <h1>Agroconnect</h1>
+        <div id="loginSection">
+            <!-- Login form from the login page -->
+            <input type="text" id="username" placeholder="Username">
+            <br>
+            <input type="password" id="loginpassword" placeholder="Password">
+            <br>
+            <button onclick="login()">Login</button>
+            <br>
+            <p id="forgotPassword" onclick="showForgotPassword()">Forgotten password?</p>
+            <div id="forgotPasswordSection" class="hidden">
+                <input type="text" id="usernameofuser" placeholder="Username">
+                <input type="phone" id="newphonenumber" placeholder="Enter registered phonenumber">
+                <input type="password" id="newPassword" placeholder="Enter New Password">
+                <br>
+                <button onclick="updatePassword()">Submit</button>
+            </div>
+        </div>
+        <div class="container">
+            <!-- Homepage content from the home page -->
+            <div class="item">
+                <img src="carrot.jpg" alt="Carrot">
+                <h3>Carrot</h3>
+                <select id="carrotSelect">
+                    <option value="1">500g - $1</option>
+                    <option value="2">1kg - $2</option>
+                </select>
+                <button onclick="addToCart('Carrot')">Add to Cart</button>
+            </div>
+            <!-- Other items -->
+        </div>
+        <div id="space"></div>
+        <button onclick="showCreateAccount()">Create New Account</button>
+        <div id="createAccountSection" class="hidden">
+            <input type="text" id="name" placeholder="Name">
+            <br>
+            <input type="password" id="password" placeholder="Password">
+            <br>
+            <input type="tel" id="phone" placeholder="Phone Number">
+            <br>
+            <button onclick="createAccount()">Submit</button>
+            <p id="successMessage" class="hidden">Account created successfully!</p>
+        </div>
+        <div id="cart">
+            <!-- Cart section from the home page -->
+            <h2>Cart</h2>
+            <ul id="cartItems"></ul>
+        </div>
+    </div>
+    <script>
+        // JavaScript functions from both pages
+        let userobj = {};
+        function login() {
+          var username = document.getElementById('username').value;
+          var password = document.getElementById('loginpassword').value;
+          var users = JSON.parse(localStorage.getItem('users')) || [];
+          var user = users.find(u => u.name === username && u.password === password);
+          if (user) {
+            alert('Login successful!');
+          } else {
+            alert('Invalid username or password.');
+          }
+          document.getElementById('username').value = "";
+          document.getElementById('loginpassword').value = "";
+        }
+        function showForgotPassword() {
+          document.getElementById('forgotPasswordSection').classList.toggle('hidden');
+        }
+        function updatePassword() {
+          var username = document.getElementById('usernameofuser').value;
+          var newPassword = document.getElementById('newPassword').value;
+          var newphonenumber = document.getElementById('newphonenumber').value;
+          var users = JSON.parse(localStorage.getItem('users')) || [];
+          var userIndex = users.findIndex(u => u.name === username && u.phone === newphonenumber); 
+          if (userIndex !== -1) {
+            users[userIndex].password = newPassword;
+            localStorage.setItem('users', JSON.stringify(users));
+            alert('Password updated successfully!');
+          } else {
+            alert('Invalid username or password.');
+          }
+          document.getElementById('usernameofuser').value = "";
+          document.getElementById('newPassword').value = "";
+          document.getElementById('newphonenumber').value = "";
+        }
+        function showCreateAccount() {
+          document.getElementById('createAccountSection').classList.toggle('hidden');
+        }
+        function createAccount() {
+          var name = document.getElementById('name').value;
+          var password = document.getElementById('password').value;
+          var phone = document.getElementById('phone').value;
+          if (name.trim() === '' || password.trim() === '' || phone.trim() === '') {
+            alert('Please fill in all fields.');
+            return;
+          }
+          if (!/^\d{10}$/.test(phone)) {
+            alert('Phone number must be 10 digits.');
+            return;
+          }
+          var users = JSON.parse(localStorage.getItem('users')) || [];
+          users.push({
+            name: name,
+            password: password,
+            phone: phone
+          });
+          localStorage.setItem('users', JSON.stringify(users));
+          document.getElementById('successMessage').classList.remove('hidden');
+          setTimeout(function() {
+            document.getElementById('successMessage').classList.add('hidden');
+            document.getElementById('createAccountSection').classList.add('hidden');
+          },
+          1000);
+          userobj = localStorage.getItem("users");
+          console.log(userobj);
+          document.getElementById('name').value = "";
+          document.getElementById('password').value = "";
+          document.getElementById('phone').value = "";
+        }
+        function addToCart(itemName) {
+            const selectElement = document.getElementById(${itemName.replace(/\s+/g, '')}Select);
+            const selectedItem = {
+                name: itemName,
+                price: selectElement.options[selectElement.selectedIndex].value,
+                quantity: 1
+            };
+            updateCart(selectedItem);
+        }
+
+        function updateCart(item) {
+            const cartItemsElement = document.getElementById('cartItems');
+            const existingItem = document.querySelector(li[data-name="${item.name}"]);
+            
+            if (existingItem) {
+                item.quantity += parseInt(existingItem.dataset.quantity);
+                existingItem.dataset.quantity = item.quantity;
+                existingItem.textContent = ${item.name} - $${item.price} x ${item.quantity};
+            } else {
+                const listItem = document.createElement('li');
+                listItem.textContent = ${item.name} - $${item.price} x ${item.quantity};
+                listItem.dataset.name = item.name;
+                listItem.dataset.quantity = item.quantity;
+                cartItemsElement.appendChild(listItem);
+            }
+        }
+    </script>
+</body>
+</html>
